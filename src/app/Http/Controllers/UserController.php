@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\http\Response;
 
 class UserController extends Controller
 {
+   public function test() {
+    return 'Hi laravel';
+   }
+
     /**
      * Display a listing of the resource.
      *
@@ -26,7 +31,6 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-
         return User::create($request->all());
     }
 
@@ -35,11 +39,10 @@ class UserController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     *
      */
-    public function show(Request $request)
+    public function show($id)
     {
-        $id = $request->query('id');
+        // $id = $request->query('id');
         return User::findOrFail($id);
     }
 
@@ -49,11 +52,10 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     *
      */
     public function update(Request $request, $id)
     {
-        $id = $request->query('id');
+        $id   = $request->query('id');
         $user = User::findOrFail($id);
         $user->update($request->all());
         return $user;
@@ -64,11 +66,10 @@ class UserController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     *
      */
     public function destroy(Request $request)
     {
-        $id = $request->query('id');
+        $id   = $request->query('id');
         $user = User::findOrFail($id);
         $user->delete();
         return 204;

@@ -9,29 +9,8 @@ class Transaction extends Model
 {
     use HasFactory;
 
-     /**
-     * Get the OpenAPI schema for the model.
-     *
-     * @return array
-     */
-    public static function openApiSchema()
+    public function user()
     {
-        return [
-            'type' => 'object',
-            'properties' => [
-                'id' => [
-                    'type' => 'integer',
-                    'format' => 'int64',
-                ],
-                'name' => [
-                    'type' => 'string',
-                ],
-                'email' => [
-                    'type' => 'string',
-                    'format' => 'email',
-                ],
-
-            ],
-        ];
+        return $this->belongsTo(User::class);
     }
 }
