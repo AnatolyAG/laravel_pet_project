@@ -22,7 +22,7 @@ class RoleSeeder extends Seeder
         $this->command->info('Starting RoleSeeder');
 
         Role::create(['name' => 'admin','descr'=>'Администратор']);
-        Role::create(['name' => 'oper','descr'=>'Оператор']);
+        Role::create(['name' => 'operator','descr'=>'Оператор']);
         Role::create(['name' => 'user','descr'=>'Пользователь']);
 
         $this->command->info('RoleSeeder completed');

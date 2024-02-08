@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\http\Response;
+use Illuminate\Support\Facades\Cache;
 use App\Models\User;
+use App\Events\UserCreated;
+
+use Exception;
 
 class UserController extends Controller
 {
@@ -17,7 +21,14 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('view', User::class);
+
+        if (Cache::has('users')) {
+            // Если данные найдены в кеше, возвращаем их
+            return response()->json(Cache::get('users'));
+        }
         $all_users = User::all();
+        Cache::put('users', $all_users, now()->addMinutes(10));
         return response()->json($all_users);
     }
 
@@ -29,11 +40,14 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user = User::create($request->all());
-        if (!$user) {
-            return response()->json(['error' => 'User not created'], 422);
+        try {
+            $user = User::create($request->all());
+            event(new UserCreated($user));
+            return response()->json($user, 201);
+        } catch (Exception $e) {
+            event(new UserCreated(null,$e));
+            return response()->json(['error' => $e->getMessage()], 422);
         }
-        return response()->json($user,201);
     }
 
     /**
@@ -44,6 +58,8 @@ class UserController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('view', User::class);
+
         $user = User::find($id);
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);
@@ -60,7 +76,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // $id   = $request->query('id');
+        $this->authorize('update', User::class);
         $user = User::find($id);
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);
@@ -77,7 +93,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-
+        $this->authorize('delete', User::class);
         $user = User::find($id);
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);

@@ -5,6 +5,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
 
 /*
  * |--------------------------------------------------------------------------
@@ -19,7 +20,9 @@ use Illuminate\Support\Facades\Route;
 
 // Route::get('greeting', [UserController::class, 'test']);
 
-// Route::middleware('auth:sanctum')->group(function () {
+
+
+Route::middleware('auth:sanctum')->group(function () {
 // User CRUD
 // Route::resource('users', UserController::class);
 Route::get('users', [UserController::class, 'index']);
@@ -45,8 +48,6 @@ Route::put('transactions/{id}', [TransactionController::class, 'update']);
 Route::delete('transactions/{id}', [TransactionController::class, 'destroy']);
 
 
-// });
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
 });
+
+Route::post('login', [LoginController::class, 'login']);

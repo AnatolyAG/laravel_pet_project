@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Cache;
 
 class TransactionController extends Controller
 {
@@ -17,7 +18,14 @@ class TransactionController extends Controller
      */
     public function index()
     {
+        if (Cache::has('transactions')) {
+            // Если данные найдены в кеше, возвращаем их
+            return response()->json(Cache::get('transactions'));
+        }
+        $this->authorize('view', Transaction::class);
         $all_transaction = Transaction::all();
+        Cache::put('transactions', $all_transaction, now()->addMinutes(10));
+
         return response()->json($all_transaction);
     }
 
@@ -29,6 +37,7 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Transaction::class);
         $transaction = Transaction::create($request->all());
         if (!$transaction) {
             return response()->json(['error' => 'Transaction not created'], 422);
@@ -44,6 +53,7 @@ class TransactionController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('view', Transaction::class);
         $transaction = Transaction::find($id);
         if (!$transaction) {
             return response()->json(['error' => 'Transaction not found'], 404);
@@ -60,7 +70,7 @@ class TransactionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // $id   = $request->query('id');
+        $this->authorize('update', Transaction::class);
         $transaction = Transaction::find($id);
         if (!$transaction) {
             return response()->json(['error' => 'Transaction not found'], 404);
@@ -78,6 +88,7 @@ class TransactionController extends Controller
     public function destroy($id)
     {
 
+        $this->authorize('delete', Transaction::class);
         $transaction = Transaction::find($id);
         if (!$transaction) {
             return response()->json(['error' => 'Transaction not found'], 404);

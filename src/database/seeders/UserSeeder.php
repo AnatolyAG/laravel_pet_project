@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
             'email' => 'operator@example.com',
             'password' => bcrypt($password),
         ]);
-        $operatorRole = Role::where('name', 'oper')->first();
+        $operatorRole = Role::where('name', 'operator')->first();
         $operator->roles()->attach($operatorRole);
 
         // Создание обычного пользователя
