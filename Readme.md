@@ -25,6 +25,15 @@
 Если ошибка с правами на запись лог файлов
 - chmode -R 777 /var/www/laravel/storage/
 
+## Проект доступен по адресу 
+
+- http://localhost:8000/
+
+ ## Точка входа апи 
+
+- http://localhost:8000/api/
+  
+
 ## Documentation Swagger
  Убрано из проекта
 - **[Ref To Documentation](http://localhost:8000/api/documentation)**

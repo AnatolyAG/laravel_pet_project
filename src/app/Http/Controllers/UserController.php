@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserCreated;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\http\Response;
 use Illuminate\Support\Facades\Cache;
-use App\Models\User;
-use App\Events\UserCreated;
-
 use Exception;
 
 class UserController extends Controller
 {
-
-
     /**
      * Display a listing of the resource.
      *
@@ -45,7 +42,7 @@ class UserController extends Controller
             event(new UserCreated($user));
             return response()->json($user, 201);
         } catch (Exception $e) {
-            event(new UserCreated(null,$e));
+            event(new UserCreated(null, $e));
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
@@ -99,6 +96,6 @@ class UserController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
         $user->delete();
-        return response()->json(null,204);
+        return response()->json(null, 204);
     }
 }
