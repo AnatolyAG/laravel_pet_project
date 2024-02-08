@@ -37,9 +37,14 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
+
         try {
             $user = User::create($request->all());
+            Cache::forget('users');  // clear cache
+
             event(new UserCreated($user));
+
             return response()->json($user, 201);
         } catch (Exception $e) {
             event(new UserCreated(null, $e));
@@ -74,12 +79,18 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('update', User::class);
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+
+        try {
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+            $user->update($request->all());
+            Cache::forget('users');  // clear cache
+            return response()->json($user);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        $user->update($request->all());
-        return response()->json($user);
     }
 
     /**
@@ -91,11 +102,17 @@ class UserController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', User::class);
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+
+        try {
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+            $user->delete();
+            Cache::forget('users');  // clear cache
+            return response()->json(null, 204);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        $user->delete();
-        return response()->json(null, 204);
     }
 }

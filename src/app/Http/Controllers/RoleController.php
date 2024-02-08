@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\http\Response;
 use Illuminate\Support\Facades\Cache;
+use Exception;
 
-use App\Models\Role;
 class RoleController extends Controller
 {
     /**
@@ -35,11 +36,15 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Role::class);
-        $role = Role::create($request->all());
-        if (!$role) {
-            return response()->json(['error' => 'Role not created'], 422);
+        try {
+            $role = Role::create($request->all());
+            if (!$role) {
+                return response()->json(['error' => 'Role not created'], 422);
+            }
+            return response()->json($role, 201);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        return response()->json($role,201);
     }
 
     /**
@@ -68,12 +73,16 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('update', Role::class);
-        $role = Role::find($id);
-        if (!$role) {
-            return response()->json(['error' => 'Role not found'], 404);
+        try {
+            $role = Role::find($id);
+            if (!$role) {
+                return response()->json(['error' => 'Role not found'], 404);
+            }
+            $role->update($request->all());
+            return response()->json($role);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        $role->update($request->all());
-        return response()->json($role);
     }
 
     /**
@@ -85,12 +94,16 @@ class RoleController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Role::class);
-        $role = Role::find($id);
-        if (!$role) {
-            return response()->json(['error' => 'Role not found'], 404);
+        try {
+            $role = Role::find($id);
+            if (!$role) {
+                return response()->json(['error' => 'Role not found'], 404);
+            }
+            // $copy = $role->toArray();
+            $role->delete();
+            return response()->json(null, 204);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        // $copy = $role->toArray();
-        $role->delete();
-        return response()->json(null, 204);
     }
 }

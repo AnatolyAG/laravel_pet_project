@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Models\Transaction;
 use Illuminate\Support\Facades\Cache;
+use Exception;
 
 class TransactionController extends Controller
 {
-
-
     /**
      * Display a listing of the resource.
      *
@@ -38,12 +37,16 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Transaction::class);
-        $transaction = Transaction::create($request->all());
-        if (!$transaction) {
-            return response()->json(['error' => 'Transaction not created'], 422);
+        try {
+            $transaction = Transaction::create($request->all());
+            if (!$transaction) {
+                return response()->json(['error' => 'Transaction not created'], 422);
+            }
+            Cache::forget('transactions');  // clear cache
+            return response()->json($transaction, 201);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        Cache::forget('transactions'); // clear cache
-        return response()->json($transaction,201);
     }
 
     /**
@@ -72,13 +75,17 @@ class TransactionController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('update', Transaction::class);
-        $transaction = Transaction::find($id);
-        if (!$transaction) {
-            return response()->json(['error' => 'Transaction not found'], 404);
+        try {
+            $transaction = Transaction::find($id);
+            if (!$transaction) {
+                return response()->json(['error' => 'Transaction not found'], 404);
+            }
+            $transaction->update($request->all());
+            Cache::forget('transactions');
+            return response()->json($transaction);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        $transaction->update($request->all());
-        Cache::forget('transactions');
-        return response()->json($transaction);
     }
 
     /**
@@ -89,14 +96,17 @@ class TransactionController extends Controller
      */
     public function destroy($id)
     {
-
         $this->authorize('delete', Transaction::class);
-        $transaction = Transaction::find($id);
-        if (!$transaction) {
-            return response()->json(['error' => 'Transaction not found'], 404);
+        try {
+            $transaction = Transaction::find($id);
+            if (!$transaction) {
+                return response()->json(['error' => 'Transaction not found'], 404);
+            }
+            $transaction->delete();
+            Cache::forget('transactions');
+            return response()->json(null, 204);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        $transaction->delete();
-        Cache::forget('transactions');
-        return response()->json(null,204);
     }
 }
