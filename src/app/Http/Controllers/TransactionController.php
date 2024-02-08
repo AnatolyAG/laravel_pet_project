@@ -42,6 +42,7 @@ class TransactionController extends Controller
         if (!$transaction) {
             return response()->json(['error' => 'Transaction not created'], 422);
         }
+        Cache::forget('transactions'); // clear cache
         return response()->json($transaction,201);
     }
 
@@ -76,6 +77,7 @@ class TransactionController extends Controller
             return response()->json(['error' => 'Transaction not found'], 404);
         }
         $transaction->update($request->all());
+        Cache::forget('transactions');
         return response()->json($transaction);
     }
 
@@ -94,6 +96,7 @@ class TransactionController extends Controller
             return response()->json(['error' => 'Transaction not found'], 404);
         }
         $transaction->delete();
+        Cache::forget('transactions');
         return response()->json(null,204);
     }
 }
