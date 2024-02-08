@@ -1,9 +1,30 @@
-## Command for project
 
-## Clone from git project
+## Старт проекта
+
+Клонировать проект в папку
 - git clone 
 
+Поднять докер
+- docker-compose up -d --build
+
+Если ошибка сборки php сервиса
+- docker-compose build php
+- docker-compose up -d
+
+
+
+Зайти в контейнер 
+- docker exec -it laravel_base bash
+
+
+## Команды выаолняемые в контейнере
+
+Создать все таблицы и заполнить тестовыми данными
+- php artisan migrate:fresh --seed
+
+Если ошибка с правами на запись лог файлов
+- chmode -R 777 /var/www/laravel/storage/
 
 ## Documentation Swagger
-
+ Убрано из проекта
 - **[Ref To Documentation](http://localhost:8000/api/documentation)**

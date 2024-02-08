@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\http\Response;
 
+use App\Models\Role;
 class RoleController extends Controller
 {
     /**
@@ -13,7 +15,8 @@ class RoleController extends Controller
      */
     public function index()
     {
-        //
+        $all_roles = Role::all();
+        return response()->json($all_roles);
     }
 
     /**
@@ -24,7 +27,11 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $role = Role::create($request->all());
+        if (!$role) {
+            return response()->json(['error' => 'Role not created'], 422);
+        }
+        return response()->json($role,201);
     }
 
     /**
@@ -35,7 +42,11 @@ class RoleController extends Controller
      */
     public function show($id)
     {
-        //
+        $role = Role::find($id);
+        if (!$role) {
+            return response()->json(['error' => 'Role not found'], 404);
+        }
+        return response()->json($role);
     }
 
     /**
@@ -47,7 +58,12 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $role = Role::find($id);
+        if (!$role) {
+            return response()->json(['error' => 'Role not found'], 404);
+        }
+        $role->update($request->all());
+        return response()->json($role);
     }
 
     /**
@@ -58,6 +74,12 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $role = Role::find($id);
+        if (!$role) {
+            return response()->json(['error' => 'Role not found'], 404);
+        }
+        $copy = $role->toArray();
+        $role->delete();
+        return response()->json(null, 204);
     }
 }

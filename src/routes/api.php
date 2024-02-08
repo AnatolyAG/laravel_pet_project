@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
  * |
  */
 
-Route::get('greeting', [UserController::class, 'test']);
+// Route::get('greeting', [UserController::class, 'test']);
 
 // Route::middleware('auth:sanctum')->group(function () {
 // User CRUD

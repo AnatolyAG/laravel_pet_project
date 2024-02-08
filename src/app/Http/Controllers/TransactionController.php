@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Models\Transaction;
 
 class TransactionController extends Controller
 {
+
+
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +17,8 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
+        $all_transaction = Transaction::all();
+        return response()->json($all_transaction);
     }
 
     /**
@@ -24,7 +29,11 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $transaction = Transaction::create($request->all());
+        if (!$transaction) {
+            return response()->json(['error' => 'Transaction not created'], 422);
+        }
+        return response()->json($transaction,201);
     }
 
     /**
@@ -35,7 +44,11 @@ class TransactionController extends Controller
      */
     public function show($id)
     {
-        //
+        $transaction = Transaction::find($id);
+        if (!$transaction) {
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+        return response()->json($transaction);
     }
 
     /**
@@ -47,7 +60,13 @@ class TransactionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // $id   = $request->query('id');
+        $transaction = Transaction::find($id);
+        if (!$transaction) {
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+        $transaction->update($request->all());
+        return response()->json($transaction);
     }
 
     /**
@@ -58,6 +77,12 @@ class TransactionController extends Controller
      */
     public function destroy($id)
     {
-        //
+
+        $transaction = Transaction::find($id);
+        if (!$transaction) {
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+        $transaction->delete();
+        return response()->json(null,204);
     }
 }

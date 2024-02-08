@@ -17,7 +17,7 @@ return new class extends Migration
             // $table->integer('user_id'); //(внешний ключ, связь с пользователем)
             $table->double('amount');//(сумма транзакции)
             $table->integer('ttype'); //((тип транзакции,  0 - "приход" , 1 - "расход"))
-            $table->string('description');//(описание транзакции)
+            $table->string('description')->nullable();//(описание транзакции)
              $table->timestamps();
         });
     }

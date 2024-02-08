@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();//admin, operator,user
-            $table->string('descr')->comment('Описание роли');
+            $table->string('descr')->nullable()->comment('Описание роли');
             $table->timestamps();
         });
     }

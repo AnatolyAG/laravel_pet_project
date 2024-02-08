@@ -10,28 +10,13 @@ class Role extends Model
     use HasFactory;
 
      /**
-     * Get the OpenAPI schema for the model.
+     * The attributes that are mass assignable.
      *
-     * @return array
+     * @var array<int, string>
      */
-    public static function openApiSchema()
-    {
-        return [
-            'type' => 'object',
-            'properties' => [
-                'id' => [
-                    'type' => 'integer',
-                    'format' => 'int64',
-                ],
-                'name' => [
-                    'type' => 'string',
-                ],
-                'email' => [
-                    'type' => 'string',
-                    'format' => 'email',
-                ],
+    protected $fillable = [
+        'name',
+        'descr',
 
-            ],
-        ];
-    }
+    ];
 }

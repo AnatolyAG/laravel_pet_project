@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\http\Response;
+use App\Models\User;
 
 class UserController extends Controller
 {
-   public function test() {
-    return 'Hi laravel';
-   }
+
 
     /**
      * Display a listing of the resource.
@@ -20,7 +18,7 @@ class UserController extends Controller
     public function index()
     {
         $all_users = User::all();
-        return $all_users;
+        return response()->json($all_users);
     }
 
     /**
@@ -31,7 +29,11 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        return User::create($request->all());
+        $user = User::create($request->all());
+        if (!$user) {
+            return response()->json(['error' => 'User not created'], 422);
+        }
+        return response()->json($user,201);
     }
 
     /**
@@ -42,8 +44,11 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        // $id = $request->query('id');
-        return User::findOrFail($id);
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+        return response()->json($user);
     }
 
     /**
@@ -55,10 +60,13 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $id   = $request->query('id');
-        $user = User::findOrFail($id);
+        // $id   = $request->query('id');
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
         $user->update($request->all());
-        return $user;
+        return response()->json($user);
     }
 
     /**
@@ -67,11 +75,14 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function destroy($id)
     {
-        $id   = $request->query('id');
-        $user = User::findOrFail($id);
+
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
         $user->delete();
-        return 204;
+        return response()->json(null,204);
     }
 }
