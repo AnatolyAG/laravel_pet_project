@@ -21,11 +21,13 @@ class UserController extends Controller
         $this->authorize('view', User::class);
 
         if (Cache::has('users')) {
-            // Если данные найдены в кеше, возвращаем их
             return response()->json(Cache::get('users'));
         }
+
         $all_users = User::all();
+
         Cache::put('users', $all_users, now()->addMinutes(10));
+
         return response()->json($all_users);
     }
 
@@ -41,6 +43,7 @@ class UserController extends Controller
 
         try {
             $user = User::create($request->all());
+
             Cache::forget('users');  // clear cache
 
             event(new UserCreated($user));
@@ -63,9 +66,11 @@ class UserController extends Controller
         $this->authorize('view', User::class);
 
         $user = User::find($id);
+
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);
         }
+
         return response()->json($user);
     }
 
@@ -82,11 +87,15 @@ class UserController extends Controller
 
         try {
             $user = User::find($id);
+
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
             }
+
             $user->update($request->all());
+
             Cache::forget('users');  // clear cache
+
             return response()->json($user);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -105,11 +114,15 @@ class UserController extends Controller
 
         try {
             $user = User::find($id);
+
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
             }
+
             $user->delete();
+
             Cache::forget('users');  // clear cache
+
             return response()->json(null, 204);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

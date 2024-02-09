@@ -13,16 +13,18 @@ class UserPolicy
     {
         //
     }
+
     public function view(User $user)
     {
-        return true;
+        return true;  // view for all
     }
+
     public function create(User $user)
     {
         return $user->roles->contains(function ($role) {
             return $role->name === 'operator';
         });
-      }
+    }
 
     public function update(User $user)
     {

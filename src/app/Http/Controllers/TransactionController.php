@@ -17,12 +17,14 @@ class TransactionController extends Controller
      */
     public function index()
     {
+        $this->authorize('view', Transaction::class);
+
         if (Cache::has('transactions')) {
-            // Если данные найдены в кеше, возвращаем их
             return response()->json(Cache::get('transactions'));
         }
-        $this->authorize('view', Transaction::class);
+
         $all_transaction = Transaction::all();
+
         Cache::put('transactions', $all_transaction, now()->addMinutes(10));
 
         return response()->json($all_transaction);
@@ -37,6 +39,7 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Transaction::class);
+
         try {
             $transaction = Transaction::create($request->all());
             if (!$transaction) {
@@ -58,10 +61,13 @@ class TransactionController extends Controller
     public function show($id)
     {
         $this->authorize('view', Transaction::class);
+
         $transaction = Transaction::find($id);
+
         if (!$transaction) {
             return response()->json(['error' => 'Transaction not found'], 404);
         }
+
         return response()->json($transaction);
     }
 
@@ -75,13 +81,18 @@ class TransactionController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('update', Transaction::class);
+
         try {
             $transaction = Transaction::find($id);
+
             if (!$transaction) {
                 return response()->json(['error' => 'Transaction not found'], 404);
             }
+
             $transaction->update($request->all());
+
             Cache::forget('transactions');
+
             return response()->json($transaction);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -97,13 +108,18 @@ class TransactionController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Transaction::class);
+
         try {
             $transaction = Transaction::find($id);
+
             if (!$transaction) {
                 return response()->json(['error' => 'Transaction not found'], 404);
             }
+
             $transaction->delete();
+
             Cache::forget('transactions');
+
             return response()->json(null, 204);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

@@ -16,7 +16,7 @@ class TransactionPolicy
 
     public function view(User $user)
     {
-        return true;
+        return true;  // view for all
     }
 
     public function create(User $user)

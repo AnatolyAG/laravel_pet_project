@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RolePolicy
 {
@@ -14,10 +14,12 @@ class RolePolicy
     {
         //
     }
+
     public function view(User $user)
     {
-        return true;
+        return true;  // for all
     }
+
     public function create(User $user)
     {
         return $user->roles->contains(function ($role) {

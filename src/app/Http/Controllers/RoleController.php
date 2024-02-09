@@ -21,9 +21,13 @@ class RoleController extends Controller
             // Если данные найдены в кеше, возвращаем их
             return response()->json(Cache::get('roles'));
         }
+
         $this->authorize('view', Role::class);
+
         $all_roles = Role::all();
+
         Cache::put('roles', $all_roles, now()->addMinutes(10));
+
         return response()->json($all_roles);
     }
 
@@ -36,6 +40,7 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Role::class);
+
         try {
             $role = Role::create($request->all());
             if (!$role) {
@@ -56,10 +61,13 @@ class RoleController extends Controller
     public function show($id)
     {
         $this->authorize('view', Role::class);
+
         $role = Role::find($id);
+
         if (!$role) {
             return response()->json(['error' => 'Role not found'], 404);
         }
+
         return response()->json($role);
     }
 
@@ -73,6 +81,7 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('update', Role::class);
+
         try {
             $role = Role::find($id);
             if (!$role) {
@@ -94,6 +103,7 @@ class RoleController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Role::class);
+
         try {
             $role = Role::find($id);
             if (!$role) {
