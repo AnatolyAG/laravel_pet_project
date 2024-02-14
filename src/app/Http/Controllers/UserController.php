@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 use Exception;
 
 class UserController extends Controller
@@ -40,9 +41,16 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', User::class);
+        // add validate
+        $validatedData= $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+        ]);
 
         try {
-            $user = User::create($request->all());
+            //create user use validated data
+            $user = User::create($validatedData);
 
             Cache::forget('users');  // clear cache
 
@@ -64,6 +72,16 @@ class UserController extends Controller
     public function show($id)
     {
         $this->authorize('view', User::class);
+        //add validate input data
+        $validator = Validator::make(['id' => $id], [
+            'id' => 'required|integer|min:1',
+        ]);
+
+        // If validate - fail then return error
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
 
         $user = User::find($id);
 
@@ -84,12 +102,26 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('update', User::class);
+        // add validate $id another method for validate
+        if (!is_numeric($id) || $id <= 0 || floor($id) != $id) {
+            return response()->json(['error' => 'Invalid user ID'], 422);
+        }
 
         try {
             $user = User::find($id);
 
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
+            }
+            // add validator for user data
+            $validator = Validator::make($request->all(), [
+                'name' => 'sometimes|string|max:255',
+                'email' => 'sometimes|email|unique:users,email,'.$user->id,
+                'password' => 'sometimes|string|min:6',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
             }
 
             $user->update($request->all());
@@ -111,7 +143,10 @@ class UserController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', User::class);
-
+        // add validate for user id $is
+        if (!is_numeric($id) || $id <= 0 || floor($id) != $id) {
+            return response()->json(['error' => 'Invalid user ID'], 422);
+        }
         try {
             $user = User::find($id);
 

@@ -39,9 +39,16 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Transaction::class);
+        // add validate
+        $validatedData = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'amount' => 'required|numeric|min:0',
+            'ttype' => 'required|in:0,1',
+            'description' => 'nullable|string|max:255',
+        ]);
 
         try {
-            $transaction = Transaction::create($request->all());
+            $transaction = Transaction::create($validatedData);
             if (!$transaction) {
                 return response()->json(['error' => 'Transaction not created'], 422);
             }
@@ -61,6 +68,10 @@ class TransactionController extends Controller
     public function show($id)
     {
         $this->authorize('view', Transaction::class);
+
+        if (!is_numeric($id) || $id <= 0 || floor($id) != $id) {
+            return response()->json(['error' => 'Invalid transaction ID'], 422);
+        }
 
         $transaction = Transaction::find($id);
 
@@ -82,14 +93,25 @@ class TransactionController extends Controller
     {
         $this->authorize('update', Transaction::class);
 
+        if (!is_numeric($id) || $id <= 0 || floor($id) != $id) {
+            return response()->json(['error' => 'Invalid transaction ID'], 422);
+        }
+
         try {
             $transaction = Transaction::find($id);
 
             if (!$transaction) {
                 return response()->json(['error' => 'Transaction not found'], 404);
             }
+            // add validate
+            $validatedData = $request->validate([
+                'user_id' => 'sometimes|exists:users,id',
+                'amount' => 'sometimes|numeric|min:0',
+                'ttype' => 'sometimes|in:0,1',
+                'description' => 'sometimes|nullable|string|max:255',
+            ]);
 
-            $transaction->update($request->all());
+            $transaction->update($validatedData);
 
             Cache::forget('transactions');
 
@@ -108,6 +130,10 @@ class TransactionController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Transaction::class);
+
+        if (!is_numeric($id) || $id <= 0 || floor($id) != $id) {
+            return response()->json(['error' => 'Invalid transaction ID'], 422);
+        }
 
         try {
             $transaction = Transaction::find($id);
