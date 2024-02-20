@@ -3,6 +3,9 @@
 
 ### 1. Клонировать проект в папку
 - git clone https://github.com/AnatolyAG/laravel_pet_project.git
+- Для windows - если долго выполняються запросы то папку надо клонировать в раздел wsl2 и 
+- проверить настройку docker desktop для корректной интеграции.  
+
 
 ### 2. Поднять докер
 - docker-compose up -d --build
