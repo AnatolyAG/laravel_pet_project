@@ -8,6 +8,7 @@
 - docker-compose up -d --build
 
   #### Если ошибка сборки php сервиса
+  - может не проходитб установка composer - надо корректировать  согасно инструкции с сайта композера
   - docker-compose build php
   - docker-compose up -d
 
