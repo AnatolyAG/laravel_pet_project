@@ -3,6 +3,7 @@ version: '3.9'
 services:
   nginx:
     image: "nginx:stable-alpine"
+    container_name: laravel_nginx
     ports:
       - "8000:80"
     volumes:
@@ -31,6 +32,7 @@ services:
 
   mysql:
     image: mysql:8
+    container_name: laravel_mysql
     ports:
       - 3306:3306
     volumes:
@@ -43,6 +45,7 @@ services:
 
   redis:
     image: redis:alpine
+    container_name: laravel_redis
     ports:
       - 6379:6379
 

@@ -10,8 +10,20 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Exception;
 
+// use App\Repositories\UserRepository;
+// use App\Services\UserService;
+
 class UserController extends Controller
 {
+
+    // protected UserRepository $userRepository;
+    // protected UserService $userService;
+
+    public function __construct()
+    {
+        // $this->userRepository = $userRepository;
+        // $this->userService = $userService;
+    }
     /**
      * Display a listing of the resource.
      *
