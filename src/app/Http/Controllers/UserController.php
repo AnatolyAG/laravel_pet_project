@@ -3,26 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Events\UserCreated;
+use App\Http\Requests\CreateUserRequest;
+// use App\Http\Requests\ShowUserRequest;
+
+use App\Http\Requests\ShowUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\http\Response;
-use Illuminate\Support\Facades\Cache;
+
 use Illuminate\Support\Facades\Validator;
 use Exception;
 
-// use App\Repositories\UserRepository;
-// use App\Services\UserService;
+use App\Repositories\UserRepository;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
 
-    // protected UserRepository $userRepository;
-    // protected UserService $userService;
+    protected UserRepository $userRepository;
+    protected UserService $userService;
 
-    public function __construct()
+    public function __construct(UserRepository $userRepository,UserService $userService)
     {
-        // $this->userRepository = $userRepository;
-        // $this->userService = $userService;
+        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
     /**
      * Display a listing of the resource.
@@ -32,45 +36,24 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('view', User::class);
-
-        if (Cache::has('users')) {
-            return response()->json(Cache::get('users'));
-        }
-
-        $all_users = User::all();
-
-        Cache::put('users', $all_users, now()->addMinutes(10));
-
-        return response()->json($all_users);
+        $users_arr = $this->userService->getAllUsers();
+        return response()->json($users_arr);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\CreateUserRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateUserRequest $request)
     {
         $this->authorize('create', User::class);
-        // add validate
-        $validatedData= $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-        ]);
-
+       
         try {
-            //create user use validated data
-            $user = User::create($validatedData);
-
-            Cache::forget('users');  // clear cache
-
-            event(new UserCreated($user));
-
+            $user = $this->userService->createUser($request->validated());
             return response()->json($user, 201);
         } catch (Exception $e) {
-            event(new UserCreated(null, $e));
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
@@ -78,29 +61,14 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     *
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(int $userId)
     {
         $this->authorize('view', User::class);
-        //add validate input data
-        $validator = Validator::make(['id' => $id], [
-            'id' => 'required|integer|min:1',
-        ]);
-
-        // If validate - fail then return error
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->first()], 422);
-        }
-
-
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
-
+        $user = $this->userService->getUserById($userId);
+      
         return response()->json($user);
     }
 
