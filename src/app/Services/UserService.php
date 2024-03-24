@@ -44,15 +44,40 @@ class UserService
         return $users_arr;
     }
     /**
-     * @param int $user_id
+     * @param int $userId
      */
-    public function getUserById(int $user_id)
+    public function getUserById(int $userId)
     {
-        $userById = $this->userRepository->findById($user_id);
+        $userById = $this->userRepository->findById($userId);
         return $userById;
     }
 
+    public function updateUser($data,int $userId)
+    {
 
+        $userById = $this->userRepository->findById($userId);
+        try {
+            $new_data_user = $this->userRepository->update($userById,$data);
+            $this->clearUserCache();
+            return $new_data_user;
+        } catch (Exception $e) {
+            // event(new UserUpdated(null, $e)); // if you have this event
+        }
+        return null;
+    }
+    public function deleteUser(int $userId):?bool
+    {
+
+        $userById = $this->userRepository->findById($userId);
+        try {
+            $res_bool = $this->userRepository->delete($userById);
+            $this->clearUserCache();
+            return $res_bool;
+        } catch (Exception $e) {
+            // event(new UserDeleted(null, $e)); // if you have this event
+        }
+        return null;
+    }
 
 
     private function clearUserCache()

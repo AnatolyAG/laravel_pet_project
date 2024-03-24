@@ -11,24 +11,24 @@ class UserRepository
         return User::all();
     }
 
-    public function findById($id)
+    public function findById($id): User
     {
         return User::findOrFail($id);
     }
 
-    public function create(array $data)
+    public function create(array $data): User
     {
         return User::create($data);
     }
 
-    public function update(User $user, array $data)
+    public function update(User $user, array $data): User
     {
         $user->update($data);
         return $user;
     }
 
-    public function delete(User $user)
+    public function delete(User $user):bool
     {
-        $user->delete();
+        return $user->delete();;
     }
 }

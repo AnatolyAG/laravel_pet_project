@@ -7,9 +7,11 @@ use App\Http\Requests\CreateUserRequest;
 // use App\Http\Requests\ShowUserRequest;
 
 use App\Http\Requests\ShowUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\http\Response;
+use Illuminate\Http\Response;
 
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -23,7 +25,7 @@ class UserController extends Controller
     protected UserRepository $userRepository;
     protected UserService $userService;
 
-    public function __construct(UserRepository $userRepository,UserService $userService)
+    public function __construct(UserRepository $userRepository, UserService $userService)
     {
         $this->userRepository = $userRepository;
         $this->userService = $userService;
@@ -31,116 +33,76 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
         $this->authorize('view', User::class);
         $users_arr = $this->userService->getAllUsers();
-        return response()->json($users_arr);
+
+        return UserResource::collection($users_arr);
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\CreateUserRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Resources\UserResource
      */
     public function store(CreateUserRequest $request)
     {
         $this->authorize('create', User::class);
-       
-        try {
-            $user = $this->userService->createUser($request->validated());
-            return response()->json($user, 201);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
-        }
+        $user = $this->userService->createUser($request->validated());
+
+        return response()->json(UserResource::make($user), 201);
     }
 
     /**
      * Display the specified resource.
      *
-     *
-     * @return \Illuminate\Http\Response
+     * @param int $userId
+     * @return \App\Http\Resources\UserResource
      */
     public function show(int $userId)
     {
         $this->authorize('view', User::class);
         $user = $this->userService->getUserById($userId);
-      
-        return response()->json($user);
+
+        return UserResource::make($user);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  UpdateUserRequest  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Resources\UserResource
      */
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, int $id)
     {
         $this->authorize('update', User::class);
-        // add validate $id another method for validate
-        if (!is_numeric($id) || $id <= 0 || floor($id) != $id) {
-            return response()->json(['error' => 'Invalid user ID'], 422);
-        }
+        $validated = $request->validated();
+        $updated_user = $this->userService->updateUser($validated, $id);
 
-        try {
-            $user = User::find($id);
-
-            if (!$user) {
-                return response()->json(['error' => 'User not found'], 404);
-            }
-            // add validator for user data
-            $validator = Validator::make($request->all(), [
-                'name' => 'sometimes|string|max:255',
-                'email' => 'sometimes|email|unique:users,email,'.$user->id,
-                'password' => 'sometimes|string|min:6',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()], 422);
-            }
-
-            $user->update($request->all());
-
-            Cache::forget('users');  // clear cache
-
-            return response()->json($user);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        return UserResource::make($updated_user);
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $this->authorize('delete', User::class);
-        // add validate for user id $is
-        if (!is_numeric($id) || $id <= 0 || floor($id) != $id) {
-            return response()->json(['error' => 'Invalid user ID'], 422);
-        }
-        try {
-            $user = User::find($id);
 
-            if (!$user) {
-                return response()->json(['error' => 'User not found'], 404);
-            }
-
-            $user->delete();
-
-            Cache::forget('users');  // clear cache
-
+        $user_deleted_status = $this->userService->deleteUser($id);
+        if ($user_deleted_status === true) {
             return response()->json(null, 204);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        } else {
+            return response()->json(['error' => 'Failed to delete user'], 500);
         }
     }
+
 }
